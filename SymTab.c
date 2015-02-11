@@ -46,7 +46,7 @@ bool EnterName(struct SymTab *ATable, const char *Name, struct SymEntry **AnEntr
     if(entry != NULL) {
         //Name already found in table
         AnEntry = &entry;
-        return true;
+        return false;
     } else {
         //allocating space for AnEntry
         char* name = strdup(Name);
@@ -55,9 +55,7 @@ bool EnterName(struct SymTab *ATable, const char *Name, struct SymEntry **AnEntr
         entry->Attributes = NULL;
         entry->Next = NULL;
 
-
         index = HashCode(Name)%ATable->size;
-        printf("Adding %s with hashcode %d into table of size %d at index %d\n", Name, HashCode(Name), ATable->size, index);
 
         temp = ATable->Contents[index];
         if( temp == NULL ) {
@@ -68,8 +66,8 @@ bool EnterName(struct SymTab *ATable, const char *Name, struct SymEntry **AnEntr
             }
             temp->Next = entry;
         }
-        AnEntry = &entry;
-        return false;
+        (*AnEntry) = entry;
+        return true;
     }
 }
 
@@ -93,15 +91,22 @@ struct SymEntry* FindName(struct SymTab *ATable, const char *Name) {
 }
 
 void SetAttr(struct SymEntry *AnEntry, void *Attributes) {
-    AnEntry->Attributes = Attributes;
+    if( AnEntry != NULL )
+        AnEntry->Attributes = Attributes;
 }
 
 void* GetAttr(struct SymEntry *AnEntry) {
-    return AnEntry->Attributes;
+    if( AnEntry == NULL )
+        return NULL;
+    else
+        return AnEntry->Attributes;
 }
 
 const char* GetName(struct SymEntry *AnEntry) {
-    return AnEntry->Name;
+    if( AnEntry == NULL )
+        return NULL;
+    else
+        return AnEntry->Name;
 }
 
 struct SymEntry* FirstEntry(struct SymTab *ATable) {
