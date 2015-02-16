@@ -41,11 +41,15 @@ bool EnterName(struct SymTab *ATable, const char *Name, struct SymEntry **AnEntr
     struct SymEntry* entry = NULL;
     struct SymEntry* temp = NULL;
     int index;
+
+    if( ATable == NULL )
+        return false;
+
     entry = FindName(ATable, Name);
 
     if(entry != NULL) {
         //Name already found in table
-        AnEntry = &entry;
+        (*AnEntry) = entry;
         return false;
     } else {
         //allocating space for AnEntry
@@ -74,12 +78,16 @@ bool EnterName(struct SymTab *ATable, const char *Name, struct SymEntry **AnEntr
 struct SymEntry* FindName(struct SymTab *ATable, const char *Name) {
     struct SymEntry* CurrEntry = NULL;
 
+    if( ATable == NULL )
+        return NULL;
+    //Find index for the name
     int index = HashCode(Name)%ATable->size;
 
     if( ATable->Contents[index] == NULL ) {
         return NULL;
     }
     else {
+        //Search the index for name.  Return it if found.
         CurrEntry = ATable->Contents[index];
         while( CurrEntry != NULL ) {
             if( strcmp(CurrEntry->Name, Name) == 0 )
@@ -111,6 +119,8 @@ const char* GetName(struct SymEntry *AnEntry) {
 
 struct SymEntry* FirstEntry(struct SymTab *ATable) {
     int i;
+    if( ATable == NULL )
+        return NULL;
 
     for( i = 0; i < ATable->size; ++i ) {
         if( ATable->Contents[i] != NULL)
@@ -121,6 +131,9 @@ struct SymEntry* FirstEntry(struct SymTab *ATable) {
 
 struct SymEntry* NextEntry(struct SymTab *ATable, struct SymEntry *AnEntry) {
     int index;
+
+    if( ATable == NULL )
+        return NULL;
 
     if( AnEntry->Next != NULL )
         return AnEntry->Next;
