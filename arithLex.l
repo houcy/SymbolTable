@@ -16,7 +16,7 @@ digit [0-9]
 
 %% 
 
-{digit}                                                 {return  INT;} 
+{digit}+                                                 {return  INT;} 
 {letter}({letter}|{digit})*                  {return  Ident;}  
 \*                                                        {return  '*';}  
 \+                                                        {return '+';}

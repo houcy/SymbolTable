@@ -74,11 +74,11 @@ char GetSourceChar() {
 void WriteIndicator(int AColumn) {
     int i;
     if( !(IsListingFile) )
-        printf("%d. %s\n", currRow, buffer);
-    else
-        fprintf(ListingFile, "\n");
+        printf("%d. %s", currRow, buffer);
+    // else
+    //     fprintf(ListingFile, "\n");
 
-    for( i = 0; i < AColumn + 3; ++i ) {
+    for( i = 0; i < AColumn + ReturnOffset(); ++i ) {
         if( IsListingFile ) 
             fprintf(ListingFile, " ");
         else
@@ -89,8 +89,18 @@ void WriteIndicator(int AColumn) {
     else {
         printf("^\n");
     }
+}
 
+int ReturnOffset() {
+    int count = 0;
+    int tempRowCount = currRow;
 
+    while( tempRowCount != 0 ) {
+        tempRowCount /= 10;
+        count++;
+    }
+
+    return count + 1;
 }
 
 void WriteMessage(const char* AMessage) {

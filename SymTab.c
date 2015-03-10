@@ -178,9 +178,9 @@ void PrintTable(struct SymTab *ATable) {
             while( currEntry != NULL ) {
                 if( currEntry -> Attributes != NULL ) {
                     if(GetAttr(currEntry) != NULL)
-                        printf("%s = %d =>", currEntry->Name, (int)GetAttr(currEntry));
+                        printf("(%s = %d) => ", currEntry->Name, (int)GetAttr(currEntry));
                     else
-                        printf("%s = NULL =>", currEntry->Name);
+                        printf("(%s = NULL) => ", currEntry->Name);
                 }
                 currEntry = currEntry->Next;
             }

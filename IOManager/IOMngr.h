@@ -43,3 +43,8 @@ int GetCurrentLine();
   Return the column number of the most recently returned line.
 */
 int GetCurrentColumn();
+
+/*
+  Return the offset to start printing message indicators
+*/
+int ReturnOffset();
