@@ -17,20 +17,20 @@ LDFLAGS=-lm
 # List all of the binary programs you want to build here
 # Separate each program with a single space
 #
-all: driver
+all: launcher
 
 #
 # Project main program
 #
-SymTab.o: SymTab.c SymTab.h
-	$(CC) -o SymTab.o $(CFLAGS) -c SymTab.c
 
-driver: SymTab.o driver.c
-	$(CC) -o driver driver.c SymTab.o $(CFLAGS) $(LDFLAGS)
+launcher: semantics.c main.c SymTab.c SymTab.h IOManager/IOMngr.c arithYacc.y semantics.h 
+	yacc -d arithYacc.y
+	lex arithLex.l 
+	$(CC) -o launcher $(CFLAGS) y.tab.c lex.yy.c semantics.c SymTab.c IOManager/IOMngr.c main.c
 
 #
 # Cleanup the files that we have created
 #
 clean:
-	$(RM) SymTab driver
+	$(RM) launcher
 	$(RM) -rf *.dSYM *.o
