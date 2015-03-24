@@ -2,7 +2,6 @@
 FILE* SourceFile = NULL;
 FILE* ListingFile = NULL;
 bool IsListingFile = false;
-bool FirstRead = true;
 int currCol = 0;
 int currRow = 0;
 char buffer[MAXLINE];
@@ -34,29 +33,11 @@ void CloseFiles() {
 }
 
 char GetSourceChar() {
-    if( FirstRead == true ) {
-        if( 0 != feof(SourceFile) ) 
-            return EOF;
-
-        char* FgetsReturn = NULL;
-        FgetsReturn = fgets(buffer, MAXLINE, SourceFile);
-        if( FgetsReturn == NULL )
-            return EOF;
-
-        if( IsListingFile == true ) {
-            fprintf(ListingFile, "%d. %s", ++currRow, buffer);
-        } else {
-            currRow++;
-        }
-
-        FirstRead = false;
-    }
-    else if( strlen(buffer) == currCol) {
+    if( strlen(buffer) == currCol) {
         if( 0 != feof(SourceFile) )
             return EOF;
 
-        char* FgetsReturn = NULL;
-        FgetsReturn = fgets(buffer, MAXLINE, SourceFile);
+        char* FgetsReturn = fgets(buffer, MAXLINE, SourceFile);
         if( FgetsReturn == NULL )
 	return EOF;
 
@@ -75,8 +56,6 @@ void WriteIndicator(int AColumn) {
     int i;
     if( !(IsListingFile) )
         printf("%d. %s", currRow, buffer);
-    // else
-    //     fprintf(ListingFile, "\n");
 
     for( i = 0; i < AColumn + ReturnOffset(); ++i ) {
         if( IsListingFile ) 

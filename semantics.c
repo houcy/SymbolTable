@@ -10,13 +10,14 @@ void printSymTab() {
 }
 
 void storeVar(char *name, int v) {
-    struct SymEntry *entry = (struct SymEntry*)malloc(sizeof(struct SymEntry));
+    struct SymEntry *entry;
     EnterName(table, name, &entry);
     SetAttr(entry, (void *)v );
 }
 
 int getVal(char *name) {
     struct SymEntry *entry = FindName(table, name);
+
     if (entry == NULL) {
         storeVar(name, 0);
         return 0;

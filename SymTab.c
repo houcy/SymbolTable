@@ -99,7 +99,6 @@ struct SymEntry* FindName(struct SymTab *ATable, const char *Name) {
 }
 
 void SetAttr(struct SymEntry *AnEntry, void *Attributes) {
-    if( AnEntry != NULL )
         AnEntry->Attributes = Attributes;
 }
 
@@ -176,12 +175,7 @@ void PrintTable(struct SymTab *ATable) {
             printf("[%d]", i);
             currEntry = ATable->Contents[i];
             while( currEntry != NULL ) {
-                if( currEntry -> Attributes != NULL ) {
-                    if(GetAttr(currEntry) != NULL)
-                        printf("(%s = %d) => ", currEntry->Name, (int)GetAttr(currEntry));
-                    else
-                        printf("(%s = NULL) => ", currEntry->Name);
-                }
+                printf("(%s = %d) => ", currEntry->Name, (int)GetAttr(currEntry));
                 currEntry = currEntry->Next;
             }
             printf("\n");
