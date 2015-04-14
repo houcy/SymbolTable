@@ -1,7 +1,7 @@
 %{  
 
 #include  "IOManager/IOMngr.h"  
-#include  "semantics.h"  
+#include  "Semantics.h"  
 #include  <string.h>  
 
 extern  int  yylex();   /*  The  next  token  funcTon.  */ 

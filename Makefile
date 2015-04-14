@@ -23,10 +23,10 @@ all: launcher
 # Project main program
 #
 
-launcher: semantics.c main.c SymTab.c SymTab.h IOManager/IOMngr.c arithYacc.y semantics.h 
-	yacc -d arithYacc.y
-	lex arithLex.l 
-	$(CC) -o launcher $(CFLAGS) y.tab.c lex.yy.c semantics.c SymTab.c IOManager/IOMngr.c main.c
+launcher: Semantics.c main.c SymTab.c SymTab.h IOManager/IOMngr.c ExprEval.y Semantics.h 
+	yacc -d ExprEval.y
+	lex lex1.l 
+	$(CC) -o launcher $(CFLAGS) y.tab.c lex.yy.c Semantics.c SymTab.c CodeGen.c IOManager/IOMngr.c main.c
 
 #
 # Cleanup the files that we have created

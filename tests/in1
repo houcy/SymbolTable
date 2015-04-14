@@ -1,0 +1,12 @@
+int num1;
+int num2;
+int num3;
+num1 = 10 + 2;
+num2 = 20 * 3 + num1;
+num2 = num2 - 2;
+num1 = -(num1+4);
+num3 = 10/2;
+print num1;
+print num2;
+print num3;
+
