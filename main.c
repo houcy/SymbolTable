@@ -9,6 +9,7 @@ extern int yyparse();
 struct SymTab *table;
 struct SymTab *ProcSymTab;
 struct SymEntry *entry;
+struct ExprResList *exprList;
 int inProc =0;
 FILE *aFile;
 

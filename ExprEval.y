@@ -24,48 +24,128 @@ extern struct SymEntry *entry;
   struct ExprRes * ExprRes;
   struct InstrSeq * InstrSeq;
   struct BExprRes * BExprRes;
+  struct ExprResList * ExprResList;
+  struct IdList * IdList;
 }
 
-%type <string> Id
+%type <string> IntId
+%type <string> BoolId
+%type <string> StringLiteral
 %type <ExprRes> Factor
 %type <ExprRes> Term
 %type <ExprRes> Expr
+%type <ExprRes> Expon
+%type <ExprRes> BTerm
+%type <ExprRes> BOr
+%type <ExprRes> BAnd
+%type <ExprRes> BNot
 %type <InstrSeq> StmtSeq
 %type <InstrSeq> Stmt
+%type <ExprRes> BoolFactor
+%type <ExprRes> BoolEq;
 %type <BExprRes> BExpr
+%type <ExprResList> List;
+%type <IdList> IDList;
 
-%token Ident 		
+%token UndefinedIdent	
+%token StrLit
+%token IntIdent
+%token BoolIdent
 %token IntLit 	
+%token True
+%token False
 %token Int
+%token Bool
 %token Write
+%token Println
+%token Printsp
+%token Printstr
 %token IF
-%token EQ	
+%token ELSE
+%token EQ
+%token NEQ
+%token GEQ
+%token LEQ	
+%token AND 
+%token OR 
+%token NOT
+%token WHILE
+%token READ
 
 %%
 
 Prog			:	Declarations StmtSeq						             {Finish($2); } ;
 Declarations	             :	Dec Declarations							{ };
 Declarations	             :										{ };
-Dec			:	Int Ident {EnterName(table, yytext, &entry); }';'	                          {};
+Dec			:	Int UndefinedIdent {EnterName(table, yytext, &entry); SetType(entry, INTEGER); }';'	                                    {};
+Dec                                 :            Bool UndefinedIdent {EnterName(table, yytext, &entry); SetType(entry, BOOLEAN);}';'                                     {};
 StmtSeq 		:	Stmt StmtSeq								{$$ = AppendSeq($1, $2); } ;
 StmtSeq		:										{$$ = NULL;} ;
-Stmt			:	Write Expr ';'								{$$ = doPrint($2); };
-Stmt			:	Id '=' Expr ';'								{$$ = doAssign($1, $3);} ;
-Stmt			:	IF '(' BExpr ')' '{' StmtSeq '}'					             {$$ = doIf($3, $6);};
-BExpr		             :	Expr EQ Expr								{$$ = doBExpr($1, $3);};
+
+Stmt                                :           Write BoolFactor ';'                                                                                            {$$ = doPrintBool($2,1); };
+Stmt                                :           Write Expr ';'                                                                                              {$$ = doPrint($2,1); };
+Stmt                                :           Write '(' List ')' ';'                                                                                     {$$ = doPrintList($3);};
+Stmt                                :           Println '(' ')' ';'                                                                                {$$ = doPrintLine();};
+Stmt                                :           Printsp '(' Expr ')' ';'                                                                                {$$ = doPrintSpaces($3);};
+Stmt                                :           Printstr '(' StringLiteral ')' ';'                                                              {$$ = doPrintStringLit($3);};
+Stmt                                :           IntId '=' Expr ';'                                                                                     {$$ = doAssign($1, $3);} ;
+Stmt                                :           BoolId '=' BOr ';'                                                                                     {$$ = doAssign($1, $3);} ;
+Stmt			 :	IF '(' BExpr ')' '{' StmtSeq '}'					             {$$ = doIf($3, $6);};
+Stmt                                :           IF '(' BExpr ')' '{' StmtSeq '}' ELSE '{' StmtSeq '}'                                      {$$ = doIfElse($3, $6, $10);};
+Stmt                                :           WHILE '(' BExpr ')' '{' StmtSeq '}'                                                                 {$$ = doWhile($3, $6);};
+
+Stmt                                :           READ '(' IDList ')' ';'                                                                                                  {$$ = doRead($3);};
+
+StringLiteral                     :             StrLit                                                                                                                { $$ = strdup(yytext);};
+
+IDList                                :            IntId ',' IDList                                                                                                   {$$ = addToIDList($1, $3);};
+IDList                                :            BoolId ',' IDList                                                                                                {$$ = addToIDList($1, $3);}
+IDList                                :            IntId                                                                                                                  {$$ = addToIDList($1, NULL);}
+IDList                                :             BoolId                                                                                                              {$$ = addToIDList($1, NULL);}
+
+List                                    :           BOr ',' List                                                                                                        {$$ = addToExpressionList($1, $3, 1);};  
+List                                    :           Expr ',' List                                                                                                       {$$ = addToExpressionList($1, $3, 0);};                                                                                                       
+List                                    :           Expr                                                                                                                  {$$ = makeExprResList($1, 0);};
+List                                    :           BOr                                                                                                                   {$$ = makeExprResList($1, 1);};
+
+BExpr                              :             BOr                                                                                                                {$$ = doBExpr($1);};
+BOr                                  :              BOr OR BAnd                                                                                                 {$$ = doBoolOr($1, $3);};
+BOr                                  :              BAnd                                                                                                               {$$ = $1;};
+BAnd                                 :            BAnd AND BNot                                                                                             {$$ = doBoolAnd($1, $3);};
+BAnd                                :             BNot                                                                                                              {$$ = $1;};
+BNot                                 :             NOT BNot                                                                                                            {$$ = doBoolNot($2);};
+BNot                                :           BoolEq                                                                                                               {$$ = $1;};
+
+BoolEq		             :	  Expr EQ Expr								{$$ = doBoolOperation($1, $3, "seq");};
+BoolEq                              :            Expr NEQ Expr                                                                                                {$$ = doBoolOperation($1, $3, "sne");};
+BoolEq                              :            BTerm                                                                                                              {$$ = $1;};
+BTerm                              :            Expr GEQ Expr                                                                                                {$$ = doBoolOperation($1, $3, "sge");};
+BTerm                              :            Expr LEQ Expr                                                                                                {$$ = doBoolOperation($1, $3, "sle");};
+BTerm                              :            Expr '>' Expr                                                                                                {$$ = doBoolOperation($1, $3, "sgt");};
+BTerm                              :            Expr '<' Expr                                                                                                {$$ = doBoolOperation($1, $3, "slt");};
+BTerm                              :            BoolFactor                                                                                                             {$$ = $1;};
+
 Expr			:	Expr '+' Term								{$$ = doAdd($1, $3); } ;
 Expr                                :            Expr '-' Term                                                                                                  {$$ = doSub($1, $3); } ;
 Expr			:	Term									{$$ = $1; } ;
-Term		             :	Term '*' Factor								{ $$ = doMult($1, $3); } ;
-Term                              :             Term '/' Factor                                                                                            { $$ = doDiv($1, $3); } ;
-Term                               :            Term '%' Factor                                                                                           { $$ = doMod($1, $3); } ;
-Term		             :	Factor									{ $$ = $1; } ;
+Term		             :	Term '*' Expon								{ $$ = doMult($1, $3); } ;
+Term                              :             Term '/' Expon                                                                                            { $$ = doDiv($1, $3); } ;
+Term                               :            Term '%' Expon                                                                                           { $$ = doMod($1, $3); } ;
+Term		             :	Expon									{ $$ = $1; } ;
+Expon                               :           Expon '^' Factor                                                                                            { $$ = doExpon($1, $3); } ;
+Expon                               :           Factor                                                                                                            { $$ = $1; } ;
 Factor                              :           '-'Factor                                                                                                         {$$ = doNegate($2);};
 Factor                             :            '(' Expr ')'                                                                                                      { $$ = $2; };
 Factor		             :	IntLit									{ $$ = doIntLit(yytext); };
-Factor		             :	Ident									{ $$ = doRval(yytext); };
-Id			: 	Ident									{ $$ = strdup(yytext);}
- 
+Factor		             :	IntIdent									{ $$ = doRval(yytext); };
+IntId                                  :          IntIdent                                                                                                         { $$ = strdup(yytext);};
+
+BoolFactor                      :          '(' BOr ')'                                                                                                           { $$ = $2;};
+BoolFactor                      :          True                                                                                                                 { $$ = doIntLit("1");};
+BoolFactor                      :           False                                                                                                               { $$ = doIntLit("0");};
+BoolFactor                      :           BoolIdent                                                                                                      { $$ = doRval(yytext);};
+BoolId			: 	BoolIdent							            { $$ = strdup(yytext);}
+
 %%
 
 yyerror(char *s)  {

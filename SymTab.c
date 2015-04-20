@@ -57,6 +57,7 @@ bool EnterName(struct SymTab *ATable, const char *Name, struct SymEntry **AnEntr
         entry = (struct SymEntry*)malloc(sizeof(struct SymEntry));
         entry->Name = name;
         entry->Attributes = NULL;
+        entry->Type = 0;
         entry->Next = NULL;
 
         index = HashCode(Name)%ATable->size;
@@ -96,6 +97,17 @@ struct SymEntry* FindName(struct SymTab *ATable, const char *Name) {
         }
     }
     return NULL;
+}
+
+void SetType(struct SymEntry *AnEntry, int type ) {
+    AnEntry->Type = type;
+}
+
+int GetType(struct SymEntry *AnEntry) {
+    if( AnEntry == NULL )
+        return 0;
+    else
+        return AnEntry->Type;
 }
 
 void SetAttr(struct SymEntry *AnEntry, void *Attributes) {
@@ -175,7 +187,7 @@ void PrintTable(struct SymTab *ATable) {
             printf("[%d]", i);
             currEntry = ATable->Contents[i];
             while( currEntry != NULL ) {
-                printf("(%s = %d) => ", currEntry->Name, (int)GetAttr(currEntry));
+                printf("(%s = %d) => ", currEntry->Name, GetType(currEntry));
                 currEntry = currEntry->Next;
             }
             printf("\n");

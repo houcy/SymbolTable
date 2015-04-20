@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#define BOOLEAN 1
+#define INTEGER 2
+#define STRING 3
 /*
  The  symbol  table  structure  proper.  Implemented  as  a  hash  table  that  uses  
  separate  chaining  to  resolve  collisions    
@@ -17,6 +20,7 @@ struct SymTab { int size;
 struct SymEntry { char *Name;
                   void *Attributes;
                   struct SymEntry *Next;
+                  int Type;
 };
 
 /*  CreateSymTab: create and return a reference to a symbol table of approximately Size
@@ -50,6 +54,8 @@ struct SymEntry* FindName(struct SymTab *ATable, const char *Name);
 
 void SetAttr(struct SymEntry *AnEntry, void *Attributes);
 void* GetAttr(struct SymEntry *AnEntry);
+void SetType(struct SymEntry *AnEntry, int type);
+int GetType(struct SymEntry *AnEntry);
 const char* GetName(struct SymEntry *AnEntry);
 
 /*  These two functions can be used to enumerate the contents of a table. The enumeration order
