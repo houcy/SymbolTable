@@ -1,0 +1,6 @@
+int x;
+int y;
+bool b;
+x = 2;
+read(x,y,b);
+print(x,y,b);

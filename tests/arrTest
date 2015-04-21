@@ -1,0 +1,14 @@
+int x[10];
+bool y[5];
+x[2] = 3;
+y[0] = True;
+printstr "Value of x[2]: ";
+print x[1*2];
+printstr "Enter in x[9]: ";
+read(x[9], x[4], x[3], y[1]);
+printstr "Value of x[9]: ";
+print x[5*2-1];
+print x[4];
+print x[3];
+print y[0];
+print y[1];

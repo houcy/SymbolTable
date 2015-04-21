@@ -57,6 +57,8 @@ while                                                           {return WHILE;}
 \}					{return '}';}
 \(					{return '(';}
 \)					{return ')';}
+\[                                                               {return '[';}
+\]                                                               {return ']';}
 
 [ ]				{}
 \t				{}
@@ -77,6 +79,12 @@ int determineType(char* yytext) {
        } else {
             if(entry->Type == INTEGER)
                 return IntIdent;
+            else if(entry->Type == INTARR)
+                return IntArrIdent;
+            else if(entry->Type == BOOLARR) {
+                return BoolArrIdent;
+                printf("HERE");
+            }
             
             return BoolIdent;
        }

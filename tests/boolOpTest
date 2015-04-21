@@ -1,0 +1,33 @@
+int b;
+int i;
+int j;
+int k;
+int mike1;
+int n;
+int y;
+int g;
+int x;
+int z;
+bool c;
+bool r;
+b = 4;
+j = 3;
+k = 2;
+mike1 = 1;
+n = 3;
+y = 1;
+i = 4;
+c = False;
+r = (2*i>j+k-mike1 && n > 2 * y) || c;
+c = !c;
+
+g = 2*i;
+x = j+k-mike1;
+z = 2*y;
+print g;
+print x;
+print n;
+print z;
+
+print c;
+print r;

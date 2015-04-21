@@ -6,6 +6,7 @@
 struct IdList {
   struct SymEntry * TheEntry;
   struct IdList * Next;
+  struct ExprRes *Expr;
 };
 
 struct ExprRes {
@@ -30,9 +31,13 @@ struct BExprRes {
 
 /* Semantics Actions */
 
+extern struct IdList * addToIDList(char * curr, struct IdList * nextItem, struct ExprRes * Res1);
+// extern struct IdList * addArrToIDLIst(char * curr, struct ExprRes * Res1, struct IdList * nextItem);
+
 extern struct ExprRes *  doIntLit(char * digits);
 extern struct ExprRes *  doRval(char * name);
 extern struct InstrSeq *  doAssign(char * name,  struct ExprRes * Res1);
+extern struct InstrSeq * doAssignArr(char *name, struct ExprRes * Res1, struct ExprRes * Res2);
 
 extern struct ExprRes *  doAdd(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct ExprRes *  doSub(struct ExprRes * Res1,  struct ExprRes * Res2);
@@ -58,9 +63,12 @@ extern struct InstrSeq * doPrintBool(struct ExprRes * Expr, int PrintNewLine);
 extern struct InstrSeq * doPrintSpaces(struct ExprRes * Expr);
 extern struct InstrSeq * doPrintLine();
 extern struct InstrSeq * doPrintStringLit(char* input);
+extern struct InstrSeq * doPrintArr(char* input, struct ExprRes * Expr, int isBool);
+
+extern void AllocateSpace(struct SymEntry * entry, char * size);
 
 extern struct ExprResList * makeExprResList(struct ExprRes * Res1, int isBoolean);
 extern struct ExprResList * addToExpressionList(struct ExprRes * curr, struct ExprResList * nextItem, int isBoolean);
-extern struct IdList * addToIDList(char * curr, struct IdList * nextItem);
+
 
 extern void	Finish(struct InstrSeq *Code);

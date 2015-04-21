@@ -30,7 +30,10 @@ extern struct SymEntry *entry;
 
 %type <string> IntId
 %type <string> BoolId
+%type <string> BoolArrId
+%type <string> IntArrId
 %type <string> StringLiteral
+%type <string> UndefinedId
 %type <ExprRes> Factor
 %type <ExprRes> Term
 %type <ExprRes> Expr
@@ -50,6 +53,8 @@ extern struct SymEntry *entry;
 %token UndefinedIdent	
 %token StrLit
 %token IntIdent
+%token IntArrIdent
+%token BoolArrIdent
 %token BoolIdent
 %token IntLit 	
 %token True
@@ -71,25 +76,37 @@ extern struct SymEntry *entry;
 %token NOT
 %token WHILE
 %token READ
+%token IntArr
+%token BoolArr
 
 %%
 
 Prog			:	Declarations StmtSeq						             {Finish($2); } ;
 Declarations	             :	Dec Declarations							{ };
 Declarations	             :										{ };
-Dec			:	Int UndefinedIdent {EnterName(table, yytext, &entry); SetType(entry, INTEGER); }';'	                                    {};
-Dec                                 :            Bool UndefinedIdent {EnterName(table, yytext, &entry); SetType(entry, BOOLEAN);}';'                                     {};
+
+Dec                                 :            Int  UndefinedId '[' Factor {EnterName(table, $2, &entry); SetType(entry, INTARR); SetAttr(entry, (void*) strdup(yytext)); } ']' ';'                  {};
+Dec                                 :            Bool UndefinedId '[' Factor {EnterName(table, $2, &entry); SetType(entry, BOOLARR); SetAttr(entry, (void*) strdup(yytext));} ']' ';'                {};
+Dec			:	Int UndefinedId ';'	                                                                            {EnterName(table, $2, &entry); SetType(entry, INTEGER); };
+Dec                                 :            Bool UndefinedId ';'                                                                                   {EnterName(table, $2, &entry); SetType(entry, BOOLEAN);};
+
 StmtSeq 		:	Stmt StmtSeq								{$$ = AppendSeq($1, $2); } ;
 StmtSeq		:										{$$ = NULL;} ;
 
 Stmt                                :           Write BoolFactor ';'                                                                                            {$$ = doPrintBool($2,1); };
 Stmt                                :           Write Expr ';'                                                                                              {$$ = doPrint($2,1); };
 Stmt                                :           Write '(' List ')' ';'                                                                                     {$$ = doPrintList($3);};
+Stmt                                :           Write IntArrId '[' Expr ']' ';'                                                                           {$$ = doPrintArr($2, $4, 0);}; //0 for int
+Stmt                                :           Write BoolArrId '[' Expr ']' ';'                                                                        {$$ = doPrintArr($2, $4, 1);}; //1 for bool
 Stmt                                :           Println '(' ')' ';'                                                                                {$$ = doPrintLine();};
 Stmt                                :           Printsp '(' Expr ')' ';'                                                                                {$$ = doPrintSpaces($3);};
-Stmt                                :           Printstr '(' StringLiteral ')' ';'                                                              {$$ = doPrintStringLit($3);};
+Stmt                                :           Printstr  StringLiteral  ';'                                                              {$$ = doPrintStringLit($2);};
+
 Stmt                                :           IntId '=' Expr ';'                                                                                     {$$ = doAssign($1, $3);} ;
 Stmt                                :           BoolId '=' BOr ';'                                                                                     {$$ = doAssign($1, $3);} ;
+Stmt                                :           IntArrId '[' Expr ']' '=' Expr ';'                                                               {$$ = doAssignArr($1, $3, $6);};
+Stmt                                :           BoolArrId '[' Expr ']' '=' BOr ';'                                                              {$$ = doAssignArr($1, $3, $6);};
+
 Stmt			 :	IF '(' BExpr ')' '{' StmtSeq '}'					             {$$ = doIf($3, $6);};
 Stmt                                :           IF '(' BExpr ')' '{' StmtSeq '}' ELSE '{' StmtSeq '}'                                      {$$ = doIfElse($3, $6, $10);};
 Stmt                                :           WHILE '(' BExpr ')' '{' StmtSeq '}'                                                                 {$$ = doWhile($3, $6);};
@@ -98,10 +115,14 @@ Stmt                                :           READ '(' IDList ')' ';'         
 
 StringLiteral                     :             StrLit                                                                                                                { $$ = strdup(yytext);};
 
-IDList                                :            IntId ',' IDList                                                                                                   {$$ = addToIDList($1, $3);};
-IDList                                :            BoolId ',' IDList                                                                                                {$$ = addToIDList($1, $3);}
-IDList                                :            IntId                                                                                                                  {$$ = addToIDList($1, NULL);}
-IDList                                :             BoolId                                                                                                              {$$ = addToIDList($1, NULL);}
+IDList                                :            IntArrId '[' Expr ']' ',' IDList                                                                              {$$ = addToIDList($1, $6, $3);};
+IDList                                :            BoolArrId '[' Expr ']' ',' IDList                                                                            {$$ = addToIDList($1, $6, $3);};
+IDList                                :            IntId ',' IDList                                                                                                   {$$ = addToIDList($1, $3, NULL);};
+IDList                                :            BoolId ',' IDList                                                                                                {$$ = addToIDList($1, $3, NULL);};
+IDList                                :            IntArrId '[' Expr ']'                                                                                             {$$ = addToIDList($1, NULL, $3);};
+IDList                                :            BoolArrId '[' Expr ']'                                                                                          {$$ = addToIDList($1, NULL, $3);};
+IDList                                :            IntId                                                                                                                  {$$ = addToIDList($1, NULL, NULL);};
+IDList                                :            BoolId                                                                                                              {$$ = addToIDList($1, NULL, NULL);};
 
 List                                    :           BOr ',' List                                                                                                        {$$ = addToExpressionList($1, $3, 1);};  
 List                                    :           Expr ',' List                                                                                                       {$$ = addToExpressionList($1, $3, 0);};                                                                                                       
@@ -139,12 +160,16 @@ Factor                             :            '(' Expr ')'                    
 Factor		             :	IntLit									{ $$ = doIntLit(yytext); };
 Factor		             :	IntIdent									{ $$ = doRval(yytext); };
 IntId                                  :          IntIdent                                                                                                         { $$ = strdup(yytext);};
+IntArrId                            :           IntArrIdent                                                                                                     { $$ = strdup(yytext);};
+
+UndefinedId                     :           UndefinedIdent                                                                                              { $$ = strdup(yytext);};
 
 BoolFactor                      :          '(' BOr ')'                                                                                                           { $$ = $2;};
 BoolFactor                      :          True                                                                                                                 { $$ = doIntLit("1");};
 BoolFactor                      :           False                                                                                                               { $$ = doIntLit("0");};
 BoolFactor                      :           BoolIdent                                                                                                      { $$ = doRval(yytext);};
 BoolId			: 	BoolIdent							            { $$ = strdup(yytext);}
+BoolArrId                        :            BoolArrIdent                                                                                                 { $$ = strdup(yytext);};
 
 %%
 

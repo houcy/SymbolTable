@@ -1,12 +1,20 @@
 int num1;
 int num2;
 int num3;
+int num4;
+int num5;
+bool b1;
 num1 = 10 + 2;
 num2 = 20 * 3 + num1;
 num2 = num2 - 2;
 num1 = -(num1+4);
 num3 = 10/2;
+num4 = 2^2;
+num5 = 3 ^ 0;
+b1 = True;
 print num1;
 print num2;
 print num3;
-
+print num4;
+print num5;
+print b1;

@@ -115,10 +115,12 @@ void SetAttr(struct SymEntry *AnEntry, void *Attributes) {
 }
 
 void* GetAttr(struct SymEntry *AnEntry) {
-    if( AnEntry == NULL )
+    if( AnEntry == NULL ) {
         return NULL;
-    else
+    }
+    else {
         return AnEntry->Attributes;
+    }
 }
 
 const char* GetName(struct SymEntry *AnEntry) {

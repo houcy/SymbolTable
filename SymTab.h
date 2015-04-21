@@ -7,6 +7,8 @@
 #define BOOLEAN 1
 #define INTEGER 2
 #define STRING 3
+#define INTARR 4
+#define BOOLARR 5
 /*
  The  symbol  table  structure  proper.  Implemented  as  a  hash  table  that  uses  
  separate  chaining  to  resolve  collisions    

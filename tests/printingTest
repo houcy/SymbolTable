@@ -1,0 +1,16 @@
+int i;
+int j;
+int k;
+bool b;
+bool g;
+i = 2;
+j = 4;
+k = 13;
+b = True;
+g = False;
+
+print(b || g, b && g, i *j);
+printsp(2*3);
+print(i,j);
+println();
+printstr("hello");
