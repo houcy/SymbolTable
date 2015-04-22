@@ -79,6 +79,8 @@ extern struct SymEntry *entry;
 %token IntArr
 %token BoolArr
 
+//NOTE:  2 shift reduce conflicts come from loadFromArr
+
 %%
 
 Prog			:	Declarations StmtSeq						             {Finish($2); } ;
@@ -159,6 +161,7 @@ Factor                              :           '-'Factor                       
 Factor                             :            '(' Expr ')'                                                                                                      { $$ = $2; };
 Factor		             :	IntLit									{ $$ = doIntLit(yytext); };
 Factor		             :	IntIdent									{ $$ = doRval(yytext); };
+Factor                              :           IntArrId '[' Expr ']'                                                                                         { $$ = loadFromArr($1, $3);};
 IntId                                  :          IntIdent                                                                                                         { $$ = strdup(yytext);};
 IntArrId                            :           IntArrIdent                                                                                                     { $$ = strdup(yytext);};
 
@@ -168,6 +171,7 @@ BoolFactor                      :          '(' BOr ')'                          
 BoolFactor                      :          True                                                                                                                 { $$ = doIntLit("1");};
 BoolFactor                      :           False                                                                                                               { $$ = doIntLit("0");};
 BoolFactor                      :           BoolIdent                                                                                                      { $$ = doRval(yytext);};
+BoolFactor                      :           BoolArrId '[' Expr ']'                                                                                      { $$ = loadFromArr($1, $3);};
 BoolId			: 	BoolIdent							            { $$ = strdup(yytext);}
 BoolArrId                        :            BoolArrIdent                                                                                                 { $$ = strdup(yytext);};
 

@@ -352,21 +352,6 @@ struct IdList * addToIDList(char * curr, struct IdList * nextItem, struct ExprRe
 
 }
 
-// struct IdList * addArrToIDLIst(char * curr, struct ExprRes * Res1, struct IdList * nextItem) {
-//     struct IdList *list = (struct IdList *) malloc(sizeof(struct IdList));
-//     struct SymEntry * entry = FindName(table, curr);
-//     if(!entry) {
-//         WriteIndicator(GetCurrentColumn());
-//         WriteMessage("Undeclared variable");
-//     }
-
-//     list -> TheEntry = entry;
-//     list -> Next = nextItem;
-//     list -> Expr = Res1;
-
-//     return list;
-// }
-
 struct ExprResList * addToExpressionList(struct ExprRes * curr, struct ExprResList * nextItem, int isBoolean) {
     struct ExprResList *list = (struct ExprResList *) malloc(sizeof(struct ExprResList));
     list -> Expr = curr;
@@ -610,28 +595,25 @@ struct InstrSeq * doRead(struct IdList * List) {
 
 }
 
-void AllocateSpace(struct SymEntry * entry, char * size) {
-    //TODO
+struct ExprRes * loadFromArr(char * name, struct ExprRes * Expr) {
+    int reg = AvailTmpReg();
+    int reg2 = AvailTmpReg();
+
+    char buffer[80];
+    sprintf(buffer, "(%s)", TmpRegName(reg2));
+
+    AppendSeq(Expr->Instrs,GenInstr(NULL,"la",TmpRegName(reg), name,NULL)); //load address of array into reg
+    AppendSeq(Expr->Instrs,GenInstr(NULL,"mul",TmpRegName(reg2), TmpRegName(Expr->Reg), "4")); //multiply arrayIndex by 4. offset is reg2
+    AppendSeq(Expr->Instrs,GenInstr(NULL,"add",TmpRegName(reg2), TmpRegName(reg), TmpRegName(reg2))); //reg2 becomes address of arr[idx]
+    AppendSeq(Expr->Instrs,GenInstr(NULL,"lw",TmpRegName(Expr->Reg), buffer, NULL));
+    Expr->Name = strdup(name);
+
+    ReleaseTmpReg(reg);
+    ReleaseTmpReg(reg2);
+    return Expr;
 }
 
-/*
 
-extern struct InstrSeq * doIf(struct ExprRes *res1, struct ExprRes *res2, struct InstrSeq * seq) {
-	struct InstrSeq *seq2;
-	char * label;
-	label = GenLabel();
-	AppendSeq(res1->Instrs, res2->Instrs);
-	AppendSeq(res1->Instrs, GenInstr(NULL, "bne", TmpRegName(res1->Reg), TmpRegName(res2->Reg), label));
-	seq2 = AppendSeq(res1->Instrs, seq);
-	AppendSeq(seq2, GenInstr(label, NULL, NULL, NULL, NULL));
-	ReleaseTmpReg(res1->Reg);
-  	ReleaseTmpReg(res2->Reg);
-	free(res1);
-	free(res2);
-	return seq2;
-}
-
-*/
 void							 
 Finish(struct InstrSeq *Code)
 { struct InstrSeq *code;
@@ -656,8 +638,6 @@ Finish(struct InstrSeq *Code)
  entry = FirstEntry(table);
  while (entry) {
              if(entry->Type == STRING) {
-                // char buffer[80];
-                // sprintf(buffer, "\"%s\"", (char*) GetName(entry));
                 AppendSeq(code,GenInstr((char *) GetName(entry),".asciiz", (char*) GetAttr(entry),NULL,NULL));
              } else if (entry->Type == INTARR || entry->Type == BOOLARR){
                 char buffer[80];

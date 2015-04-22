@@ -57,6 +57,8 @@ extern struct InstrSeq * doIfElse(struct BExprRes *bRes, struct InstrSeq * seq1,
 extern struct InstrSeq * doWhile(struct BExprRes * bRes, struct InstrSeq * seq);
 extern struct InstrSeq * doRead(struct IdList * List);
 
+extern struct ExprRes * loadFromArr(char * name, struct ExprRes * Expr);
+
 extern struct InstrSeq *  doPrint(struct ExprRes * Expr, int PrintNewLine);
 extern struct InstrSeq * doPrintList(struct ExprResList * List);
 extern struct InstrSeq * doPrintBool(struct ExprRes * Expr, int PrintNewLine);
@@ -64,8 +66,6 @@ extern struct InstrSeq * doPrintSpaces(struct ExprRes * Expr);
 extern struct InstrSeq * doPrintLine();
 extern struct InstrSeq * doPrintStringLit(char* input);
 extern struct InstrSeq * doPrintArr(char* input, struct ExprRes * Expr, int isBool);
-
-extern void AllocateSpace(struct SymEntry * entry, char * size);
 
 extern struct ExprResList * makeExprResList(struct ExprRes * Res1, int isBoolean);
 extern struct ExprResList * addToExpressionList(struct ExprRes * curr, struct ExprResList * nextItem, int isBoolean);
